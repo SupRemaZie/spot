@@ -76,7 +76,7 @@ const projetSchema = new Schema<IProjet>(
     },
     code_projet: {
       type: String,
-      unique: true,
+      unique: true, // Crée automatiquement un index unique
       sparse: true, // Permet plusieurs null
       trim: true,
       uppercase: true,
@@ -167,7 +167,7 @@ const projetSchema = new Schema<IProjet>(
 );
 
 // Index pour optimiser les requêtes
-projetSchema.index({ code_projet: 1 }, { unique: true, sparse: true });
+// Note: l'index unique sur code_projet est déjà créé par la propriété unique: true du schéma
 projetSchema.index({ statut: 1 });
 projetSchema.index({ priorite: 1 });
 projetSchema.index({ chef_projet: 1 });

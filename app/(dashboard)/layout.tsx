@@ -11,10 +11,16 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Protection directement dans le layout (remplace middleware.ts)
   const user = await getCurrentUser();
 
   if (!user) {
     redirect('/login');
+  }
+
+  // Vérifier que l'utilisateur est actif
+  if (user.statut !== 'ACTIF') {
+    redirect('/login?error=inactive');
   }
 
   return (

@@ -33,19 +33,21 @@ export const authConfig: NextAuthConfig = {
           }).select('+password'); // Inclure le password (normalement exclu par select: false)
 
           if (!membre) {
-            // Log tentative de connexion échouée
-            await createAuditLog('LOGIN_FAILED', {
+            // Log tentative de connexion échouée (non bloquant)
+            createAuditLog('LOGIN_FAILED', {
               metadata: { email: credentials.email, reason: 'User not found or inactive' },
-            });
+            }).catch(err => console.error('Erreur audit LOGIN_FAILED:', err));
+            console.log(`[AUTH] Tentative de connexion échouée: utilisateur non trouvé ou inactif - ${credentials.email}`);
             return null;
           }
 
           // Vérifier le mot de passe
           if (!membre.password) {
-            await createAuditLog('LOGIN_FAILED', {
+            createAuditLog('LOGIN_FAILED', {
               user_id: membre._id,
               metadata: { email: credentials.email, reason: 'No password set' },
-            });
+            }).catch(err => console.error('Erreur audit LOGIN_FAILED:', err));
+            console.log(`[AUTH] Tentative de connexion échouée: aucun mot de passe défini - ${credentials.email}`);
             return null;
           }
 
@@ -55,19 +57,21 @@ export const authConfig: NextAuthConfig = {
           );
 
           if (!isPasswordValid) {
-            // Log tentative de connexion échouée
-            await createAuditLog('LOGIN_FAILED', {
+            // Log tentative de connexion échouée (non bloquant)
+            createAuditLog('LOGIN_FAILED', {
               user_id: membre._id,
               metadata: { email: credentials.email, reason: 'Invalid password' },
-            });
+            }).catch(err => console.error('Erreur audit LOGIN_FAILED:', err));
+            console.log(`[AUTH] Tentative de connexion échouée: mot de passe incorrect - ${credentials.email}`);
             return null;
           }
 
-          // Log connexion réussie
-          await createAuditLog('LOGIN', {
+          // Log connexion réussie (non bloquant)
+          createAuditLog('LOGIN', {
             user_id: membre._id,
             metadata: { email: credentials.email },
-          });
+          }).catch(err => console.error('Erreur audit LOGIN:', err));
+          console.log(`[AUTH] Connexion réussie: ${credentials.email} (${membre.role_principal})`);
 
           // Retourner les informations utilisateur
           return {
@@ -79,7 +83,15 @@ export const authConfig: NextAuthConfig = {
             statut: membre.statut,
           };
         } catch (error) {
-          console.error('Erreur lors de l\'authentification:', error);
+          console.error('[AUTH] Erreur lors de l\'authentification:', error);
+          // Log l'erreur d'authentification (non bloquant)
+          createAuditLog('LOGIN_FAILED', {
+            metadata: { 
+              email: credentials?.email, 
+              reason: 'Authentication error',
+              error: error instanceof Error ? error.message : String(error)
+            },
+          }).catch(err => console.error('Erreur audit LOGIN_FAILED:', err));
           return null;
         }
       },

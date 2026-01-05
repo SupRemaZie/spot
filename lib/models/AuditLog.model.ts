@@ -57,6 +57,7 @@ const auditLogSchema = new Schema<IAuditLog>(
   {
     timestamps: true,
     collection: 'audit_logs',
+    suppressReservedKeysWarning: true, // Permet l'utilisation du champ 'collection' qui est réservé
   }
 );
 

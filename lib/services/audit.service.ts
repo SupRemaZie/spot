@@ -6,6 +6,7 @@
 import { AuditLog } from '../models';
 import { ActionAudit, CollectionAudit } from '../types/audit-log.types';
 import { Types } from 'mongoose';
+import connectDB from '../db/mongodb';
 
 interface AuditOptions {
   user_id?: Types.ObjectId | string;
@@ -31,6 +32,9 @@ export async function createAuditLog(
   }
 ): Promise<void> {
   try {
+    // S'assurer que MongoDB est connecté avant de créer le log
+    await connectDB();
+    
     await AuditLog.create({
       action,
       collection: options.collection,

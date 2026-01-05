@@ -23,7 +23,7 @@ const membreSchema = new Schema<IMembre>(
     email: {
       type: String,
       required: [true, "L'email est requis"],
-      unique: true,
+      unique: true, // Crée automatiquement un index unique
       lowercase: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "L'email n'est pas valide"],
@@ -130,7 +130,7 @@ const membreSchema = new Schema<IMembre>(
 );
 
 // Index pour optimiser les requêtes
-membreSchema.index({ email: 1 }, { unique: true });
+// Note: l'index unique sur email est déjà créé par la propriété unique: true du schéma
 membreSchema.index({ role_principal: 1 });
 membreSchema.index({ statut: 1 });
 membreSchema.index({ roles_secondaires: 1 });
